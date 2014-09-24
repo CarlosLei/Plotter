@@ -22,6 +22,8 @@ public:
     void setPlotSetting(const PlotSettings &settings);
     void setCurveData(int id, const QVector<QPointF>&data);
     void clearCurve(int id);
+
+    //重载函数
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 public slots:
@@ -42,7 +44,7 @@ private:
     void drawGrid(QPainter *painter);
     void drawCurves(QPainter *painter);
 
-    enum { Margin = 50};
+    enum { Margin = 50};//决定画图大小
 
     QToolButton *zoomInButton;
     QToolButton *zoomOutButton;
@@ -54,4 +56,32 @@ private:
     QPixmap pixmap;
 };
 
+class PlotSettings
+{
+public:
+    PlotSettings();
+
+    void scroll(int dx, int dy);
+    void adjust();
+    double spanX() const { return maxX - minX;}
+    double spanY() const { return maxY - minY;}
+
+    double minX;
+    double maxX;
+    int numXTicks;
+    double minY;
+    double maxY;
+    int numYTicks;
+private:
+    static void adjustAxis(double &min, double &max, int &numTicks);
+};
+
+
 #endif // PLOTTER_H
+
+
+
+
+
+
+
