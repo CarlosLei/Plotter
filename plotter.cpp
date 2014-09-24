@@ -2,6 +2,8 @@
 
 #include <QToolButton>
 #include <QStylePainter>
+#include <QStyleOptionFocusRect>
+#include <QMouseEvent>
 
 Plotter::Plotter(QWidget *parent)
     : QWidget(parent)
@@ -86,7 +88,50 @@ QSize Plotter::sizeHint() const
     return QSize(12*Margin, 8*Margin);
 }
 //-------------------------------------------
+void Plotter::paintEvent(QPaintEvent */*event*/)
+{
+    QStylePainter painter(this);
+    painter.drawPixmap(0,0,pixmap);
 
+    if(rubberBandIsShown)//绘制橡皮根
+    {
+        painter.setPen(palette().light().color());
+        painter.drawRect(rubberBandRect.normalized()
+                         .adjust(0,0,-1,-1););
+    }
+    if(hasFocus())//拥有焦点？？？
+    {
+        QStyleOptionFocusRect option;
+        option.initFrom(this);
+        option.backgroundColor = palette().dark().color();
+        painter.drawPrimitive(QStyle::PE_FrameFocusRect,option);
+    }
+}
+void Plotter::resizeEvent(QResizeEvent */*event*/)
+{
+    //这里设置了两个按钮的位置
+    int x = width() - (zoomInButton->width()
+                       + zoomOutButton->width() + 10);
+    zoomInButton->move(x, 5);
+    zoomOutButton->move(x + zoomInButton->width() + 5, 5);
+    refreshPixmap();
+}
+void Plotter::mousePressEvent(QMouseEvent *event)
+{
+    QRect rect(Margin, Margin,
+               width() - 2* Margin,height() - 2* Margin);
+    if(event->button() == Qt::LeftButton)
+    {
+        if(rect.contains(event->pos()))
+        {
+            rubberBandIsShown = true;
+            rubberBandRect.setTopLeft(event->pos());
+            rubberBandRect.setBottomRight(event->pos());
+            updateRubberBandRegion();
+            setCursor(Qt::CrossCursor);
+        }
+    }
+}
 
 
 
